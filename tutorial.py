@@ -8,30 +8,30 @@ def display_score():
     score_surface = test_font.render(f"{current_time_seconds:.2f}", False, (64,64,64))
     score_rect = score_surface.get_rect(center = (400, 50))
     screen.blit(score_surface, score_rect)
+    return current_time_seconds
 
 pygame.init()
-
 screen = pygame.display.set_mode((800, 400))
 pygame.display.set_caption("Runner")
-
 clock = pygame.time.Clock()
 test_font = pygame.font.Font("font/Pixeltype.ttf", 50)
 game_active = False
 start_time = 0
+score = 0
 
-# Surfaces
+# Scene
 sky_surface = pygame.image.load("graphics/Sky.png").convert()
 ground_surface = pygame.image.load("graphics/ground.png").convert()
 
-
-# score_surface = test_font.render(f"Score: {score}", False, (64,64,64))
-# score_rect = score_surface.get_rect(center = (400, 50))
+# Enemies
+snail_surface = pygame.image.load("graphics/snail/snail1.png").convert_alpha()
+snail_rect = snail_surface.get_rect(midbottom = (800, 300))
 
 player_gravity = 0
 player_surface = pygame.image.load("graphics/Player/player_walk_1.png").convert_alpha()
 player_rect = player_surface.get_rect(midbottom = (80, 300))
 
-# Intro screen
+# Intro/Death screen
 player_stand = pygame.image.load('graphics\Player\player_stand.png').convert_alpha()
 player_stand = pygame.transform.rotozoom(player_stand,0,2)
 player_stand_rect = player_stand.get_rect(center = (400, 200))
@@ -41,13 +41,9 @@ game_title_rect = game_title.get_rect(center = (400, 80))
 instructions = test_font.render("Press  Space   to  Start", False, (64,64,64))
 instructions_rect = instructions.get_rect(center = (400, 320))
 
-
-# Initialize enemy positions
-snail_surface = pygame.image.load("graphics/snail/snail1.png").convert_alpha()
-snail_rect = snail_surface.get_rect(midbottom = (800, 300))
-
-
-
+# Timer
+obstacle_timer = pygame.USEREVENT + 1
+pygame.time.set_timer(obstacle_timer, 900)
 
 # Game-Loop
 while True:
@@ -67,7 +63,8 @@ while True:
                 game_active = True
                 snail_rect.left = 800
                 start_time = pygame.time.get_ticks()
-
+        if event.type == obstacle_timer and game_active:
+            print("test")
     if game_active:
         # Display terrain and score surfaces
         screen.blit(sky_surface, (0, 0))
@@ -75,7 +72,7 @@ while True:
         # pygame.draw.rect(screen, '#c0e8ec', score_rect)
         # pygame.draw.rect(screen, '#c0e8ec', score_rect)
         # screen.blit(score_surface, score_rect)
-        display_score()
+        score = display_score()
 
 
 
@@ -88,9 +85,9 @@ while True:
         screen.blit(player_surface, player_rect)
 
         # Decrement snail position for movement, then reset snail position
-        snail_rect.x -= 6
-        if snail_rect.right <= 0:
-            snail_rect.left = 800
+        # snail_rect.x -= 6
+        # if snail_rect.right <= 0:
+        #     snail_rect.left = 800
             
 
         if player_rect.colliderect(snail_rect):
@@ -100,7 +97,15 @@ while True:
         screen.fill((94,129,162))
         screen.blit(player_stand, player_stand_rect)
         screen.blit(game_title, game_title_rect)
-        screen.blit(instructions, instructions_rect)
+        
+        score_message = test_font.render(f"Your score: {score}", False, (64,64,64))
+        score_message_rect = score_message.get_rect(center = (400,330))
+        if score == 0:
+            screen.blit(instructions, instructions_rect)
+        else:
+            screen.blit(score_message,score_message_rect)
+
+
     # Frame-rate and screen update
     pygame.display.update()
     clock.tick(60)
